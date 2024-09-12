@@ -1,0 +1,9 @@
+includes:
+    # The PHPDoc PHPStan uses for ZipArchive::open is wrong, according to the official php docs.
+    - phpstan-zip-error.neon
+
+parameters:
+    level: max
+
+    paths:
+        - src

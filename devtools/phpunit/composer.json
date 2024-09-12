@@ -1,0 +1,8 @@
+{
+    "require-dev": {
+        "php": ">= 8.1",
+        "ext-zip": "*",
+        "ext-mbstring": "*",
+        "phpunit/phpunit": "^10"
+    }
+}
