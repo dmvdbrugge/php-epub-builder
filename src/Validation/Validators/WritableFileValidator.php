@@ -19,9 +19,7 @@ class WritableFileValidator extends BaseValidator
             return false;
         }
 
-        fclose($handle);
-
-        return true;
+        return fclose($handle);
     }
 
     protected function message(): string
