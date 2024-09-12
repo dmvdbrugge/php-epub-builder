@@ -2,6 +2,7 @@
     "name": "dmvdbrugge/epub-builder",
     "description": "Package to help you build EPUB files from your own content.",
     "type": "library",
+    "license": "MIT",
     "autoload": {
         "psr-4": {
             "DMvdBrugge\\EpubBuilder\\": "src/"
