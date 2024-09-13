@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace DMvdBrugge\EpubBuilder\Validation\Validators;
 
+use function in_array;
 use function preg_match;
+use function strtolower;
 
 class IetfValidator extends BaseValidator
 {
     /**
      * @see https://en.wikipedia.org/wiki/IETF_language_tag
      *
-     * Some of these parts are actually from a list, but that goes too far. The regex is built up as follows:
+     * Some of these parts are actually from a list but that goes too far,
+     * we're also ignoring case. The regex is built up as follows:
      *
      *     $primary    = '([a-z]{2,3}|[a-z]{5,8})';
      *     $extended   = '(-[a-z]{3}){0,3}';
@@ -26,6 +29,9 @@ class IetfValidator extends BaseValidator
      */
     private const REGEX = '/^([a-z]{2,3}|[a-z]{5,8})(-[a-z]{3}){0,3}(-[a-z]{4})?(-([a-z]{2}|[0-9]{3}))?(-([a-z]{5,8}|\d[a-z0-9]{3}))*(-([a-wyz0-9](-[a-z0-9]{2,8})+))*(-x(-[a-z0-9]{1,8})+)?$/i';
 
+    /** Common invalid cases which happen to pass the regex */
+    private const SPECIAL_CASES = ['english'];
+
     public function __construct(
         private readonly string $language,
     ) {
@@ -33,6 +39,10 @@ class IetfValidator extends BaseValidator
 
     public function valid(): bool
     {
+        if (in_array(strtolower($this->language), self::SPECIAL_CASES, true)) {
+            return false;
+        }
+
         return preg_match(self::REGEX, $this->language) === 1;
     }
 
