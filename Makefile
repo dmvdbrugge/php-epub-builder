@@ -12,7 +12,7 @@ stan: devtools/phpstan/vendor/bin/phpstan
 
 .PHONY: tests
 tests: devtools/phpunit/vendor/bin/phpunit
-	devtools/phpunit/vendor/bin/phpunit tests --bootstrap=vendor/autoload.php
+	devtools/phpunit/vendor/bin/phpunit
 
 devtools/php-cs-fixer/vendor/bin/php-cs-fixer: devtools/php-cs-fixer/composer.json
 	composer install --working-dir=devtools/php-cs-fixer

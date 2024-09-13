@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace DMvdBrugge\EpubBuilder\Tests\Validation\Validators;
+
 use DMvdBrugge\EpubBuilder\Validation\ValidationFailure;
 use DMvdBrugge\EpubBuilder\Validation\Validators\IetfValidator;
 use PHPUnit\Framework\TestCase;

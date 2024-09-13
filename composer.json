@@ -8,6 +8,11 @@
             "DMvdBrugge\\EpubBuilder\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "DMvdBrugge\\EpubBuilder\\Tests\\": "tests/"
+        }
+    },
     "authors": [
         {
             "name": "Dave van der Brugge",
