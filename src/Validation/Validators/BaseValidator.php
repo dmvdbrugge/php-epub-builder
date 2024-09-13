@@ -9,6 +9,9 @@ use DMvdBrugge\EpubBuilder\Validation\Validator;
 
 abstract class BaseValidator implements Validator
 {
+    /**
+     * The message to use in the exception, in case of failed validation.
+     */
     abstract protected function message(): string;
 
     public function validate(): void

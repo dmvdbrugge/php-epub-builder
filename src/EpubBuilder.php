@@ -5,10 +5,21 @@ declare(strict_types=1);
 namespace DMvdBrugge\EpubBuilder;
 
 use DateTimeInterface;
+use DMvdBrugge\EpubBuilder\Content\ChapterContent;
+use DMvdBrugge\EpubBuilder\Content\Content;
+use DMvdBrugge\EpubBuilder\Content\CssContent;
+use DMvdBrugge\EpubBuilder\Content\MetaContent;
+use DMvdBrugge\EpubBuilder\Content\TocContent;
+use DMvdBrugge\EpubBuilder\File\File;
+use DMvdBrugge\EpubBuilder\File\FileFailure;
 use DMvdBrugge\EpubBuilder\Validation\ValidationFailure;
 use DMvdBrugge\EpubBuilder\Validation\Validators;
 use DMvdBrugge\EpubBuilder\Zip\BuildFailure;
 use DMvdBrugge\EpubBuilder\Zip\ZipWrapper;
+
+use function array_key_exists;
+use function preg_replace;
+use function str_starts_with;
 
 class EpubBuilder
 {
@@ -65,6 +76,8 @@ class EpubBuilder
     }
 
     /**
+     * @throws ValidationFailure When the language is not a valid IETF Language Tag
+     *
      * @return $this
      */
     public function language(string $language): self
@@ -111,6 +124,8 @@ class EpubBuilder
      *
      * @param array<string, string> $chapters Array of name => content
      *
+     * @throws ValidationFailure When malformed
+     *
      * @return $this
      */
     public function chapters(array $chapters): self
@@ -123,7 +138,7 @@ class EpubBuilder
     }
 
     /**
-     * @throws ValidationFailure When $name already exists
+     * @throws ValidationFailure When a chapter with the same name already exists
      *
      * @return $this
      */
@@ -194,7 +209,7 @@ class EpubBuilder
     }
 
     /**
-     * Clean up after itself.
+     * Let the EPUB clean up after itself.
      *
      * This will delete the temporary file when totally done. Default behaviour.
      *
@@ -208,7 +223,7 @@ class EpubBuilder
     }
 
     /**
-     * Do NOT clean up after itself.
+     * Do NOT let the EPUB clean up after itself.
      *
      * The temporary file will remain.
      *
@@ -223,6 +238,7 @@ class EpubBuilder
 
     /**
      * @throws BuildFailure
+     * @throws FileFailure
      */
     public function build(): Epub
     {
@@ -230,11 +246,7 @@ class EpubBuilder
             throw new BuildFailure("No content added, not building");
         }
 
-        $file = $this->file ?? tempnam(sys_get_temp_dir(), 'zip');
-
-        if ($file === false) {
-            throw new BuildFailure("Cannot create a temporary file: either specify a file or make sure the temp dir is usable");
-        }
+        $file = $this->file ?? File::temp('zip');
 
         $zip = new ZipWrapper(cleanup: $this->cleanup);
         $zip->start($file);
@@ -248,139 +260,63 @@ class EpubBuilder
         return new Epub($zip, $this->title);
     }
 
+    /**
+     * @throws BuildFailure
+     */
     private function addMeta(ZipWrapper $zip): void
     {
         // This mimetype file HAS TO BE the first thing in the zip
         $zip->addFromString("mimetype", "application/epub+zip");
-
-        $zip->addFromString(
-            "META-INF/container.xml",
-            <<<XML
-                <?xml version="1.0"?>
-                <container xmlns="urn:oasis:names:tc:opendocument:xmlns:container" version="1.0">
-                    <rootfiles>
-                        <rootfile full-path="content/content.opf" media-type="application/oebps-package+xml"/>
-                    </rootfiles>
-                </container>
-                XML,
-        );
+        $zip->addFromString("META-INF/container.xml", MetaContent::container());
     }
 
+    /**
+     * @throws BuildFailure
+     */
     private function addContent(ZipWrapper $zip): void
     {
-        $items = '';
-        $itemrefs = '';
-        $nav = '';
-
-        foreach ($this->chapters as $name => $value) {
-            $sanitizedName = preg_replace('/[^\w\-]/u', '_', $name);
-
-            if ($sanitizedName === null) {
-                throw new BuildFailure("Failed sanitizing content identifier '{$name}'");
-            }
-
-            $file = "{$sanitizedName}.xhtml";
-
-            $items .= <<<XML
-                <item id="{$sanitizedName}" href="{$file}" media-type="application/xhtml+xml"/>
-                XML;
-
-            $itemrefs .= <<<XML
-                <itemref idref="{$sanitizedName}"/>
-                XML;
-
-            $nav .= <<<XML
-                <li><a href="{$file}">{$name}</a></li>
-                XML;
-
-            $zip->addFromString(
-                "content/{$file}",
-                <<<HTML
-                    <html xmlns="http://www.w3.org/1999/xhtml">
-                        <head>
-                            <title>{$name}</title>
-                            <link rel="stylesheet" type="text/css" href="page.css"/>
-                        </head>
-                        <body>{$value}</body>
-                    </html>
-                    HTML,
-            );
-        }
-
-        $items .= <<<XML
-            <item id="toc" href="toc.xhtml" media-type="application/xhtml+xml" properties="nav"/>
-            <item id="css" href="page.css" media-type="text/css"/>
-            XML;
-
-        $zip->addFromString(
-            "content/toc.xhtml",
-            <<<HTML
-                <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
-                    <head>
-                        <title>TOC</title>
-                        <link rel="stylesheet" type="text/css" href="page.css"/>
-                    </head>
-                    <body>
-                        <nav epub:type="toc"><ol>{$nav}</ol></nav>
-                    </body>
-                </html>
-                HTML,
-        );
+        $manifest = [];
+        $spine = [];
+        $nav = [];
 
         /*
-         * This styling is an attempt to use as much space as Apple's iPhone app "Books" allows.
-         * As I have no ereader, I don't know how it behaves on other readers, sorry.
+         * Each chapter, becoming its own xhtml file, needs to be added to:
+         * - the manifest;
+         * - the spine;
+         * - the navigation;
+         * - the zip.
          */
-        $css = $this->css ?? <<<CSS
-            @page {
-                margin: 0;
-                padding: 0;
-            }
-            body {
-                margin: 0;
-                padding: 0;
-                color: {$this->textColor};
-                background-color: {$this->backgroundColor};
-            }
-            p {
-                margin-left: 0;
-                margin-right: 0;
-                margin-bottom: 0;
-                padding-left: 0;
-                padding-right: 0;
-                padding-bottom: 0;
-            }
-            p:first-child {
-                margin-top: 0;
-                padding-top: 0;
-            }
-            CSS;
+        foreach ($this->chapters as $name => $value) {
+            $sanitizedName = $this->sanitizeChapterName($name);
+            $file = "{$sanitizedName}.xhtml";
 
-        $zip->addFromString('content/page.css', $css);
+            $manifest[] = Content::item($sanitizedName, $file);
+            $spine[] = Content::itemref($sanitizedName);
+            $nav[] = TocContent::nav($file, $name);
 
+            $zip->addFromString("content/{$file}", ChapterContent::file($name, $value));
+        }
+
+        $manifest[] = Content::tocItem();
+        $zip->addFromString("content/toc.xhtml", TocContent::file($nav));
+
+        $manifest[] = Content::cssItem();
         $zip->addFromString(
-            'content/content.opf',
-            <<<XML
-                <?xml version="1.0" encoding="UTF-8"?>
-                <package xmlns="http://www.idpf.org/2007/opf" xmlns:opf="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="BookID">
-                    <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
-                        <dc:identifier id="BookID">{$this->identifier}</dc:identifier>
-                        <dc:title>{$this->title}</dc:title>
-                        <dc:language>{$this->language}</dc:language>
-                        <dc:publisher>{$this->publisher}</dc:publisher>
-                        <dc:creator>{$this->author}</dc:creator>
-                        <dc:description>{$this->description}</dc:description>
-                        <meta property="dcterms:modified">{$this->modified}</meta>
-                    </metadata>
-                    <manifest>
-                        {$items}
-                    </manifest>
-                    <spine>
-                        {$itemrefs}
-                    </spine>
-                </package>
-                XML,
+            'content/page.css',
+            $this->css ?? CssContent::file($this->textColor, $this->backgroundColor),
         );
+
+        $zip->addFromString('content/content.opf', Content::file(
+            $manifest,
+            $spine,
+            $this->identifier,
+            $this->title,
+            $this->language,
+            $this->publisher,
+            $this->author,
+            $this->description,
+            $this->modified,
+        ));
     }
 
     /**
@@ -395,5 +331,26 @@ class EpubBuilder
         Validators::color($hashColor)->validate();
 
         return $hashColor;
+    }
+
+    /**
+     * @throws BuildFailure When unable to sanitize into non-reserved name
+     */
+    private function sanitizeChapterName(string $name): string
+    {
+        $result = preg_replace('/[^\w\-]/u', '_', $name);
+
+        if ($result === null) {
+            throw new BuildFailure("Failed sanitizing chapter name '{$name}'");
+        }
+
+        try {
+            // It would be nice if we could do this before building
+            Validators::chapterName($name, $result)->validate();
+        } catch (ValidationFailure $e) {
+            throw new BuildFailure($e->getMessage());
+        }
+
+        return $result;
     }
 }

@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace DMvdBrugge\EpubBuilder\Validation\Validators;
 
+use function preg_match;
+
+/**
+ * A valid color starts with a # followed by either 3 or 6 hex-digits.
+ */
 class ColorValidator extends BaseValidator
 {
     private const REGEX = '/^#([0-9a-f]{3}){1,2}$/i';

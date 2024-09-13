@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace DMvdBrugge\EpubBuilder\Zip;
 
+use DMvdBrugge\EpubBuilder\File\File;
+use DMvdBrugge\EpubBuilder\File\FileFailure;
 use ZipArchive;
+
+use function file_exists;
+use function unlink;
 
 class ZipWrapper
 {
@@ -26,6 +31,10 @@ class ZipWrapper
         }
     }
 
+    /**
+     * @throws BadMethodCall When using the class incorrect
+     * @throws BuildFailure  When unable to start
+     */
     public function start(string $file): void
     {
         if ($this->started) {
@@ -48,6 +57,10 @@ class ZipWrapper
         $this->started = true;
     }
 
+    /**
+     * @throws BadMethodCall When using the class incorrect
+     * @throws BuildFailure  When unable to add content
+     */
     public function addFromString(string $name, string $content): void
     {
         if ($this->finished) {
@@ -63,6 +76,10 @@ class ZipWrapper
         }
     }
 
+    /**
+     * @throws BadMethodCall When using the class incorrect
+     * @throws BuildFailure  When unable to finish
+     */
     public function finish(): void
     {
         if ($this->finished) {
@@ -81,6 +98,9 @@ class ZipWrapper
         $this->finished = true;
     }
 
+    /**
+     * @throws BadMethodCall When using the class incorrect
+     */
     public function getFileName(): string
     {
         if (!$this->started && !$this->finished) {
@@ -90,18 +110,16 @@ class ZipWrapper
         return $this->file;
     }
 
+    /**
+     * @throws BadMethodCall When using the class incorrect
+     * @throws FileFailure   When unable to determine the size
+     */
     public function getFileSize(): int
     {
         if (!$this->started && !$this->finished) {
             throw new BadMethodCall("An unstarted Epub has no file size");
         }
 
-        $size = filesize($this->file);
-
-        if ($size === false) {
-            throw new BuildFailure("Failed determining the file size of the Epub");
-        }
-
-        return $size;
+        return File::size($this->file);
     }
 }

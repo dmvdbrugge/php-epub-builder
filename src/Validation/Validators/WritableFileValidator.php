@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace DMvdBrugge\EpubBuilder\Validation\Validators;
 
+use DMvdBrugge\EpubBuilder\File\File;
+use DMvdBrugge\EpubBuilder\File\FileFailure;
+
 class WritableFileValidator extends BaseValidator
 {
     public function __construct(
@@ -13,13 +16,13 @@ class WritableFileValidator extends BaseValidator
 
     public function valid(): bool
     {
-        $handle = fopen($this->file, 'w+');
-
-        if ($handle === false) {
+        try {
+            File::close(File::open($this->file, 'w+'));
+        } catch (FileFailure) {
             return false;
         }
 
-        return fclose($handle);
+        return true;
     }
 
     protected function message(): string
