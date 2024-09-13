@@ -246,7 +246,7 @@ class EpubBuilder
             throw new BuildFailure("No content added, not building");
         }
 
-        $file = $this->file ?? File::temp('zip');
+        $file = $this->file ?? File::temp('zip-');
 
         $zip = new ZipWrapper(cleanup: $this->cleanup);
         $zip->start($file);

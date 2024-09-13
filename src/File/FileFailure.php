@@ -35,4 +35,9 @@ class FileFailure extends RuntimeException implements EpubBuilderException
     {
         return new self("Unable to determine the size of '{$fileName}'");
     }
+
+    public static function delete(string $fileName): self
+    {
+        return new self("Unable to delete file '{$fileName}'");
+    }
 }

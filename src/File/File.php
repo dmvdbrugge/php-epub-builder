@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace DMvdBrugge\EpubBuilder\File;
 
+use function clearstatcache;
 use function fclose;
+use function file_exists;
 use function filesize;
 use function fopen;
 use function is_resource;
@@ -67,6 +69,7 @@ class File
      */
     public static function size(string $fileName): int
     {
+        clearstatcache(true, $fileName);
         $size = filesize($fileName);
 
         if ($size === false) {
@@ -74,5 +77,33 @@ class File
         }
 
         return $size;
+    }
+
+    /**
+     * Provide homogeneous interface.
+     */
+    public static function exists(string $fileName): bool
+    {
+        return file_exists($fileName);
+    }
+
+    /**
+     * A file is "empty" when it exists but has a size of 0.
+     *
+     * @throws FileFailure When unable to determine the size
+     */
+    public static function empty(string $fileName): bool
+    {
+        return self::exists($fileName) && self::size($fileName) === 0;
+    }
+
+    /**
+     * @throws FileFailure When unable to delete the file
+     */
+    public static function delete(string $fileName): void
+    {
+        if (!unlink($fileName)) {
+            throw FileFailure::delete($fileName);
+        }
     }
 }

@@ -8,9 +8,6 @@ use DMvdBrugge\EpubBuilder\File\File;
 use DMvdBrugge\EpubBuilder\File\FileFailure;
 use ZipArchive;
 
-use function file_exists;
-use function unlink;
-
 class ZipWrapper
 {
     private bool $finished = false;
@@ -26,8 +23,8 @@ class ZipWrapper
 
     public function __destruct()
     {
-        if ($this->cleanup && isset($this->file) && file_exists($this->file)) {
-            unlink($this->file);
+        if ($this->cleanup && isset($this->file) && File::exists($this->file)) {
+            File::delete($this->file);
         }
     }
 
@@ -45,7 +42,9 @@ class ZipWrapper
             throw new BadMethodCall("Cannot start an already finished Epub");
         }
 
-        $opened = $this->zip->open($file, ZipArchive::CREATE);
+        // Empty files are invalid archives, so overwrite them, they're empty anyway.
+        $flags = File::empty($file) ? ZipArchive::OVERWRITE : ZipArchive::CREATE;
+        $opened = $this->zip->open($file, $flags);
 
         if ($opened !== true) {
             $reason = $opened === false ? '' : ": error code {$opened}";
@@ -111,6 +110,8 @@ class ZipWrapper
     }
 
     /**
+     * Note: there is no guarantee the file has a size until after {@see self::finish()}.
+     *
      * @throws BadMethodCall When using the class incorrect
      * @throws FileFailure   When unable to determine the size
      */
