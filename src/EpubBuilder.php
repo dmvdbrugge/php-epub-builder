@@ -18,7 +18,7 @@ use DMvdBrugge\EpubBuilder\Zip\BuildFailure;
 use DMvdBrugge\EpubBuilder\Zip\ZipWrapper;
 
 use function array_key_exists;
-use function preg_replace;
+use function mb_ereg_replace;
 use function str_starts_with;
 
 class EpubBuilder
@@ -281,10 +281,10 @@ class EpubBuilder
 
         /*
          * Each chapter, becoming its own xhtml file, needs to be added to:
-         * - the manifest;
-         * - the spine;
-         * - the navigation;
-         * - the zip.
+         * - the manifest as <item/>;
+         * - the spine as <itemref/>;
+         * - the navigation as <li><a/></li>;
+         * - the zip in the content folder.
          */
         foreach ($this->chapters as $name => $value) {
             $sanitizedName = $this->sanitizeChapterName($name);
@@ -338,9 +338,9 @@ class EpubBuilder
      */
     private function sanitizeChapterName(string $name): string
     {
-        $result = preg_replace('/[^\w\-]/u', '_', $name);
+        $result = mb_ereg_replace('[^\w\-]', '_', $name);
 
-        if ($result === null) {
+        if ($result === null || $result === false) {
             throw new BuildFailure("Failed sanitizing chapter name '{$name}'");
         }
 

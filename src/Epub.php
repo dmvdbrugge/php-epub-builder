@@ -8,6 +8,9 @@ use DMvdBrugge\EpubBuilder\File\File;
 use DMvdBrugge\EpubBuilder\File\FileFailure;
 use DMvdBrugge\EpubBuilder\Zip\ZipWrapper;
 
+use function mb_ereg_replace;
+use function trim;
+
 /**
  * Representation of a built Epub.
  *
@@ -15,10 +18,13 @@ use DMvdBrugge\EpubBuilder\Zip\ZipWrapper;
  */
 class Epub
 {
+    private readonly string $fileName;
+
     public function __construct(
         private readonly ZipWrapper $zip,
         private readonly string $title,
     ) {
+        $this->fileName = $this->sanitizeFileName($title);
     }
 
     /**
@@ -29,7 +35,7 @@ class Epub
         return [
             'Content-Type' => 'application/epub+zip',
             'Content-Length' => (string)$this->getFileSize(),
-            'Content-Disposition' => "attachment; filename=\"{$this->title}.epub\"",
+            'Content-Disposition' => "attachment; filename=\"{$this->fileName}\"",
         ];
     }
 
@@ -43,9 +49,20 @@ class Epub
         return File::open($this->getFileName());
     }
 
-    public function getFileName(): string
+    /**
+     * The current file, full path.
+     */
+    public function getFileOnDisk(): string
     {
         return $this->zip->getFileName();
+    }
+
+    /**
+     * What it wants to be called, file only.
+     */
+    public function getFileName(): string
+    {
+        return $this->fileName;
     }
 
     /**
@@ -59,5 +76,20 @@ class Epub
     public function getTitle(): string
     {
         return $this->title;
+    }
+
+    private function sanitizeFileName(string $fileName): string
+    {
+        // Adapted from https://stackoverflow.com/questions/2021624/string-sanitizer-for-filename#answer-42058764
+        $regex = "[<>:\"/\\\\|?*]|[\u{00}-\u{1F}]|[\u{7F}\u{A0}\u{AD}]";
+
+        $fileName = mb_ereg_replace($regex, '', $fileName);
+        $fileName = is_string($fileName) ? trim($fileName, ' .') : '';
+
+        if ($fileName === '') {
+            $fileName = 'epub';
+        }
+
+        return "{$fileName}.epub";
     }
 }
