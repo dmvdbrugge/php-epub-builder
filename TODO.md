@@ -1,14 +1,18 @@
 # TODO
 
 * README
-    * Basic usage
-    * Installation
-    * Documentation
-    * More?
+    * Full Documentation
+    * ?
 * Code
     * More in-code documentation, doc blocks, etc.
-    * More validation, defensive programming
+    * More validation, more defensive programming
     * Validate content being xhtml
 * Tests
-    * The single currently existing test is more to prove the test framework setup works.
-    * Up until split into its own repo, this code has been "proven to work" in a different project. As a separate library, it should be covered by tests.
+    * Just create more
+* Setup
+    * Github actions for devtools etc
+* Planned Features
+    * Proper ISBN support
+    * Cover image
+    * Custom additional content
+    * ?
