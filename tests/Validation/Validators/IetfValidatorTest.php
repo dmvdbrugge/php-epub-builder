@@ -21,9 +21,9 @@ class IetfValidatorTest extends TestCase
     }
 
     /**
-     * @dataProvider dpValidCases
+     * @dataProvider dpValidIetfs
      */
-    public function testValidCases(string $color): void
+    public function testValidIetf(string $color): void
     {
         $validator = new IetfValidator($color);
 
@@ -33,7 +33,7 @@ class IetfValidatorTest extends TestCase
     /**
      * @return array<string, array{string}>
      */
-    public static function dpValidCases(): array
+    public static function dpValidIetfs(): array
     {
         // This list is far from comprehensive but provides a nice baseline.
         return [
@@ -54,10 +54,10 @@ class IetfValidatorTest extends TestCase
     }
 
     /**
-     * @dataProvider dpInvalidCases
+     * @dataProvider dpInvalidIetfs
      * @dataProvider dpInvalidSpecialCases
      */
-    public function testInvalidCases(string $color): void
+    public function testInvalidIetf(string $color): void
     {
         $validator = new IetfValidator($color);
 
@@ -67,7 +67,7 @@ class IetfValidatorTest extends TestCase
     /**
      * @return array<string, array{string}>
      */
-    public static function dpInvalidCases(): array
+    public static function dpInvalidIetfs(): array
     {
         // This list is far from comprehensive but provides a nice baseline.
         return [

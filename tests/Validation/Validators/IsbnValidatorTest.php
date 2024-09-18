@@ -21,9 +21,9 @@ class IsbnValidatorTest extends TestCase
     }
 
     /**
-     * @dataProvider dpValidCases
+     * @dataProvider dpValidIsbns
      */
-    public function testValidCases(string $color): void
+    public function testValidIsbn(string $color): void
     {
         $validator = new IsbnValidator($color);
 
@@ -33,7 +33,7 @@ class IsbnValidatorTest extends TestCase
     /**
      * @return array<string, array{string}>
      */
-    public static function dpValidCases(): array
+    public static function dpValidIsbns(): array
     {
         return [
             'all digit 9' => ['684843285'],
@@ -49,9 +49,9 @@ class IsbnValidatorTest extends TestCase
     }
 
     /**
-     * @dataProvider dpInvalidCases
+     * @dataProvider dpInvalidIsbns
      */
-    public function testInvalidCases(string $color): void
+    public function testInvalidIsbn(string $color): void
     {
         $validator = new IsbnValidator($color);
 
@@ -61,7 +61,7 @@ class IsbnValidatorTest extends TestCase
     /**
      * @return array<string, array{string}>
      */
-    public static function dpInvalidCases(): array
+    public static function dpInvalidIsbns(): array
     {
         return [
             'empty' => [''],

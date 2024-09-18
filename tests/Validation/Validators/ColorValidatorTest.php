@@ -21,31 +21,52 @@ class ColorValidatorTest extends TestCase
     }
 
     /**
-     * @dataProvider dpValid
+     * @dataProvider dpValidColors
      */
-    public function testValid(string $color, bool $expected): void
+    public function testValidColor(string $color): void
     {
         $validator = new ColorValidator($color);
 
-        self::assertSame($expected, $validator->valid());
+        self::assertTrue($validator->valid());
     }
 
     /**
-     * @return array<string, array{string, bool}>
+     * @return array<string, array{string}>
      */
-    public static function dpValid(): array
+    public static function dpValidColors(): array
     {
         return [
-            'Shorthand' => ['#09f', true],
-            'Long form' => ['#019aff', true],
-            'Name' => ['blue', false],
-            'No hash' => ['09f', false],
-            'Non-hex' => ['#GZ!', false],
-            'Length 1' => ['#1', false],
-            'Length 2' => ['#12', false],
-            'Length 4' => ['#1234', false],
-            'Length 5' => ['#12345', false],
-            'Length 7' => ['#1234567', false],
+            'Shorthand lc' => ['#09f'],
+            'Long form lc' => ['#0a1d9f'],
+            'Shorthand uc' => ['#09F'],
+            'Long form uc' => ['#0A1D9F'],
+        ];
+    }
+
+    /**
+     * @dataProvider dpInvalidColors
+     */
+    public function testInvalidColor(string $color): void
+    {
+        $validator = new ColorValidator($color);
+
+        self::assertFalse($validator->valid());
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function dpInvalidColors(): array
+    {
+        return [
+            'Name' => ['blue'],
+            'No hash' => ['09f'],
+            'Non-hex' => ['#GZ!'],
+            'Length 1' => ['#1'],
+            'Length 2' => ['#12'],
+            'Length 4' => ['#1234'],
+            'Length 5' => ['#12345'],
+            'Length 7' => ['#1234567'],
         ];
     }
 }
