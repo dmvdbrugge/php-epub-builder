@@ -46,7 +46,7 @@ class Epub
      */
     public function getFileHandle()
     {
-        return File::open($this->getFileName());
+        return File::open($this->getFileOnDisk());
     }
 
     /**
