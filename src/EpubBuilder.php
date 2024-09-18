@@ -20,6 +20,7 @@ use DMvdBrugge\EpubBuilder\Zip\ZipWrapper;
 use function array_key_exists;
 use function mb_ereg_replace;
 use function str_starts_with;
+use function strtoupper;
 
 class EpubBuilder
 {
@@ -27,6 +28,7 @@ class EpubBuilder
     private string $author = '';
     private string $description = '';
     private string $identifier = '';
+    private string $isbn = '';
     private string $language = '';
     private string $modified = '';
     private string $publisher = '';
@@ -71,6 +73,20 @@ class EpubBuilder
     public function identifier(string $identifier): self
     {
         $this->identifier = $identifier;
+
+        return $this;
+    }
+
+    /**
+     * @throws ValidationFailure When the isbn is not a valid ISBN
+     *
+     * @return $this
+     */
+    public function isbn(string $isbn): self
+    {
+        Validators::isbn($isbn)->validate();
+
+        $this->isbn = strtoupper($isbn);
 
         return $this;
     }
@@ -309,6 +325,7 @@ class EpubBuilder
         $zip->addFromString('content/content.opf', Content::file(
             $manifest,
             $spine,
+            $this->isbn,
             $this->identifier,
             $this->title,
             $this->language,

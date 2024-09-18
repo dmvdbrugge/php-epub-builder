@@ -8,6 +8,7 @@ use DMvdBrugge\EpubBuilder\Validation\Validators\ChapterNameValidator;
 use DMvdBrugge\EpubBuilder\Validation\Validators\ChaptersValidator;
 use DMvdBrugge\EpubBuilder\Validation\Validators\ColorValidator;
 use DMvdBrugge\EpubBuilder\Validation\Validators\IetfValidator;
+use DMvdBrugge\EpubBuilder\Validation\Validators\IsbnValidator;
 use DMvdBrugge\EpubBuilder\Validation\Validators\WritableFileValidator;
 
 /**
@@ -38,6 +39,11 @@ class Validators
     public static function ietf(string $language): Validator
     {
         return new IetfValidator($language);
+    }
+
+    public static function isbn(string $isbn): Validator
+    {
+        return new IsbnValidator($isbn);
     }
 
     public static function writable(string $file): Validator

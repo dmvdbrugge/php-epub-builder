@@ -7,7 +7,7 @@ Easily transform your own content into EPUB files for reading on ereaders and bo
 ```php
 // Step 1: Get your data from somewhere
 $chapters = [
-    // Title => Content; Anything goes for Content, as long as it's valid xhtml (when added to a <body>)
+    // Title => Content; Anything goes for Content, as long as it's valid xhtml when added to a <body>
     "The Early Years" => "<h1>The Early Years</h1><p>I was youg and naive (...)"
         . "and that's how I ended up with my best friend.</p>",
     "The One that Got Away" => "<h1>The One that Got Away</h1><p>A lot of people have one,"
@@ -21,7 +21,8 @@ $lastModified = \DateTimeImmutable::createFromFormat(DATE_ATOM, "2024-09-16T05:3
 $epub = (new \DMvdBrugge\EpubBuilder\EpubBuilder())
     ->author("Me! Or You!")
     ->description("Life Stories to Learn From; or Not. You decide! This is the story of my life.")
-    ->identifier("my-awesome-website.com:book:9371") // ISBN can go here, full ISBN support will follow
+    ->isbn("0-553-10354-7") // Not required but should be valid when provided
+    ->identifier("my-awesome-website.com:book:9371") // Optional when ISBN provided
     ->language("en") // IETF language tag
     ->modified($lastModified)
     ->publisher("My Awesome Website")

@@ -12,7 +12,6 @@
 * Setup
     * Github actions for devtools etc
 * Planned Features
-    * Proper ISBN support
     * Cover image
     * Custom additional content
     * ?

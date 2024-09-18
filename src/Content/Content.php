@@ -58,6 +58,7 @@ class Content
     public static function file(
         string | array $items,
         string | array $itemrefs,
+        string $isbn,
         string $identifier,
         string $title,
         string $language,
@@ -74,11 +75,13 @@ class Content
             $itemrefs = implode('', $itemrefs);
         }
 
+        $identifiers = self::identifiers($isbn, $identifier);
+
         return <<<XML
             <?xml version="1.0" encoding="UTF-8"?>
             <package xmlns="http://www.idpf.org/2007/opf" xmlns:opf="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="BookID">
                 <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
-                    <dc:identifier id="BookID">{$identifier}</dc:identifier>
+                    {$identifiers}
                     <dc:title>{$title}</dc:title>
                     <dc:language>{$language}</dc:language>
                     <dc:publisher>{$publisher}</dc:publisher>
@@ -94,5 +97,26 @@ class Content
                 </spine>
             </package>
             XML;
+    }
+
+    private static function identifiers(string $isbn, string $identifier): string
+    {
+        if ($isbn === '') {
+            return <<<XML
+                <dc:identifier id="BookID">{$identifier}</dc:identifier>
+                XML;
+        }
+
+        $result = <<<XML
+            <dc:identifier id="BookID" opf:scheme="isbn">{$isbn}</dc:identifier>
+            XML;
+
+        if ($identifier !== '') {
+            $result .= <<<XML
+                <dc:identifier>{$identifier}</dc:identifier>
+                XML;
+        }
+
+        return $result;
     }
 }
