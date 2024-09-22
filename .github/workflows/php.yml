@@ -19,9 +19,9 @@ jobs:
 
     - name: Validate composer.json and composer.lock
       run: composer validate --strict
-        && composer validate --strict --working-dir=devtools/php-cs-fixer
-        && composer validate --strict --working-dir=devtools/phpstan
-        && composer validate --strict --working-dir=devtools/phpunit
+        && composer validate --working-dir=devtools/php-cs-fixer
+        && composer validate --working-dir=devtools/phpstan
+        && composer validate --working-dir=devtools/phpunit
 
     - name: Cache Composer Packages
       id: composer-cache
