@@ -11,34 +11,39 @@ permissions:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.experimental }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions: ['8.1', '8.2', '8.3']
+        experimental: [false]
+        include:
+          - php: '8.4'
+            experimental: true
 
     steps:
     - uses: actions/checkout@v4
 
     - name: Validate Composer Files
-      run: |
-        composer validate --strict
-        composer validate --no-check-publish --quiet --working-dir=devtools/php-cs-fixer
-        composer validate --no-check-publish --quiet --working-dir=devtools/phpstan
-        composer validate --no-check-publish --quiet --working-dir=devtools/phpunit
+      run: make validate
 
     - name: Cache Composer Packages
       id: composer-cache
       uses: actions/cache@v3
       with:
         path: |
-          vendor
           devtools/php-cs-fixer/vendor
           devtools/phpstan/vendor
           devtools/phpunit/vendor
-        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          vendor
+        key: ${{ runner.os }}-php-${{ matrix.php-versions }}-${{ hashFiles('**/composer.lock') }}
         restore-keys: |
-          ${{ runner.os }}-php-
+          ${{ runner.os }}-php-${{ matrix.php-versions }}-
 
     - name: Install Dependencies
-      run: composer install --prefer-dist --no-progress
+      run: composer install
 
     - name: Install Tools
       run: make
