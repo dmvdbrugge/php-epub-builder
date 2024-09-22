@@ -41,8 +41,7 @@ jobs:
       run: composer install --prefer-dist --no-progress
 
     - name: Install Tools
-      run: |
-        make
+      run: make
         devtools/php-cs-fixer/vendor/bin/php-cs-fixer
         devtools/phpstan/vendor/bin/phpstan
         devtools/phpunit/vendor/bin/phpunit
