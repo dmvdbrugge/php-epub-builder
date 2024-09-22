@@ -1,24 +1,35 @@
+# See Makefile.local.dist
+-include Makefile.local
+COMPOSER ?= composer
+CS_CMD ?= fix
+
+# "Executables"
+PHP_CS_FIXER = devtools/php-cs-fixer/vendor/bin/php-cs-fixer
+PHPSTAN = devtools/phpstan/vendor/bin/phpstan
+PHPUNIT = devtools/phpunit/vendor/bin/phpunit
+
 .PHONY: devtools
 devtools: codestyle stan tests
 
 .PHONY: codestyle
-codestyle: devtools/php-cs-fixer/vendor/bin/php-cs-fixer
-	devtools/php-cs-fixer/vendor/bin/php-cs-fixer fix -v
+codestyle: $(PHP_CS_FIXER)
+	$(PHP_CS_FIXER) $(CS_CMD) --verbose
 
 .PHONY: stan
-stan: devtools/phpstan/vendor/bin/phpstan
-	devtools/phpstan/vendor/bin/phpstan analyze
-	devtools/phpstan/vendor/bin/phpstan analyze --configuration=phpstan-tests.neon.dist
+stan: $(PHPSTAN)
+	$(PHPSTAN) analyze
+	$(PHPSTAN) analyze --configuration=phpstan-tests.neon.dist
 
 .PHONY: tests
-tests: devtools/phpunit/vendor/bin/phpunit
-	devtools/phpunit/vendor/bin/phpunit
+tests: $(PHPUNIT)
+	$(PHPUNIT)
 
-devtools/php-cs-fixer/vendor/bin/php-cs-fixer: devtools/php-cs-fixer/composer.json
-	composer install --working-dir=devtools/php-cs-fixer
+.PHONY: validate
+validate:
+	$(COMPOSER) validate --strict
+	$(COMPOSER) validate --no-check-publish --quiet --working-dir=devtools/php-cs-fixer
+	$(COMPOSER) validate --no-check-publish --quiet --working-dir=devtools/phpstan
+	$(COMPOSER) validate --no-check-publish --quiet --working-dir=devtools/phpunit
 
-devtools/phpstan/vendor/bin/phpstan: devtools/phpstan/composer.json
-	composer install --working-dir=devtools/phpstan
-
-devtools/phpunit/vendor/bin/phpunit: devtools/phpunit/composer.json
-	composer install --working-dir=devtools/phpunit
+devtools/%/vendor/bin/%: devtools/%/composer.json
+	$(COMPOSER) install --working-dir=devtools/%

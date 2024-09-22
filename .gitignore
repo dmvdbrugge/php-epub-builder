@@ -3,5 +3,7 @@
 .phpunit.result.cache
 composer
 composer.lock
+composer.phar
 phpstan.neon
 vendor/
+Makefile.local

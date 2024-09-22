@@ -1,0 +1,5 @@
+# Copy this file to Makefile.local and set the correct values
+# for the optional variables in the main Makefile.
+
+# Example: non-executable local composer.phar
+COMPOSER = php composer.phar

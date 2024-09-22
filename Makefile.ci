@@ -1,0 +1,2 @@
+# This file is copied to Makefile.local in CI
+CS_CMD = check --show-progress=dots
