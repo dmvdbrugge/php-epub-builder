@@ -17,11 +17,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Validate composer.json and composer.lock
+    - name: Validate Composer Files
       run: composer validate --strict
-        && composer validate --working-dir=devtools/php-cs-fixer
-        && composer validate --working-dir=devtools/phpstan
-        && composer validate --working-dir=devtools/phpunit
+        && composer validate --no-check-publish --working-dir=devtools/php-cs-fixer
+        && composer validate --no-check-publish --working-dir=devtools/phpstan
+        && composer validate --no-check-publish --working-dir=devtools/phpunit
 
     - name: Cache Composer Packages
       id: composer-cache
