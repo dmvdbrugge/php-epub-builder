@@ -18,9 +18,12 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Validate composer.json and composer.lock
-      run: composer validate --strict
+      run: composer validate --strict \
+        && composer validate --strict --working-dir=devtools/php-cs-fixer \
+        && composer validate --strict --working-dir=devtools/phpstan \
+        && composer validate --strict --working-dir=devtools/phpunit
 
-    - name: Cache Composer packages
+    - name: Cache Composer Packages
       id: composer-cache
       uses: actions/cache@v3
       with:
@@ -29,14 +32,20 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-php-
 
-    - name: Install dependencies
+    - name: Install Dependencies
       run: composer install --prefer-dist --no-progress
 
-    - name: Run PHP-CS-Fixer
+    - name: Install Tools
+      run: make \
+        devtools/php-cs-fixer/vendor/bin/php-cs-fixer \
+        devtools/phpstan/vendor/bin/phpstan \
+        devtools/phpunit/vendor/bin/phpunit
+
+    - name: Run CodeStyle Check
       run: make codestyle
 
-    - name: Run static analysis
+    - name: Run Static Analysis
       run: make stan
 
-    - name: Run test suite
+    - name: Run Test Suite
       run: make tests
