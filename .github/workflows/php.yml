@@ -20,9 +20,9 @@ jobs:
     - name: Validate Composer Files
       run: |
         composer validate --strict
-        composer validate --no-check-publish --working-dir=devtools/php-cs-fixer
-        composer validate --no-check-publish --working-dir=devtools/phpstan
-        composer validate --no-check-publish --working-dir=devtools/phpunit
+        composer validate --no-check-publish --quiet --working-dir=devtools/php-cs-fixer
+        composer validate --no-check-publish --quiet --working-dir=devtools/phpstan
+        composer validate --no-check-publish --quiet --working-dir=devtools/phpunit
 
     - name: Cache Composer Packages
       id: composer-cache
