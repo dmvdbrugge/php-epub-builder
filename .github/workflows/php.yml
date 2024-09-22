@@ -28,6 +28,9 @@ jobs:
       uses: actions/cache@v3
       with:
         path: vendor
+          devtools/php-cs-fixer/vendor
+          devtools/phpstan/vendor
+          devtools/phpunit/vendor
         key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
         restore-keys: |
           ${{ runner.os }}-php-
