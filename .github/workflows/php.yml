@@ -1,4 +1,4 @@
-iname: PHP Tools
+name: PHP Tools
 
 on:
   push:
