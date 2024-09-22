@@ -1,0 +1,59 @@
+name: PHP Tools
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.experimental }}
+    name: PHP ${{ matrix.php-versions }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions: ['8.1', '8.2', '8.3']
+        experimental: [false]
+        include:
+          - php-versions: '8.4'
+            experimental: true
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Make for CI
+      run: cp Makefile.ci Makefile.local
+
+    - name: Validate Composer Files
+      run: make validate
+
+    - name: Cache Composer Packages
+      id: composer-cache
+      uses: actions/cache@v3
+      with:
+        path: |
+          devtools/php-cs-fixer/vendor
+          devtools/phpstan/vendor
+          devtools/phpunit/vendor
+          vendor
+        key: ${{ runner.os }}-php-${{ matrix.php-versions }}-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-${{ matrix.php-versions }}-
+
+    - name: Install Dependencies
+      run: composer install
+
+    - name: Run CodeStyle Check
+      run: make codestyle
+
+    - name: Run Static Analysis
+      run: make stan
+
+    - name: Run Test Suite
+      run: make tests
