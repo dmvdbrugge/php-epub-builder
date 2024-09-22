@@ -1,4 +1,4 @@
-name: PHP Composer
+name: PHP Tools
 
 on:
   push:
@@ -13,6 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.experimental }}
+    name: PHP ${{ matrix.php-versions }}
 
     strategy:
       fail-fast: false
@@ -47,12 +48,6 @@ jobs:
 
     - name: Install Dependencies
       run: composer install
-
-    - name: Install Tools
-      run: make
-        devtools/php-cs-fixer/vendor/bin/php-cs-fixer
-        devtools/phpstan/vendor/bin/phpstan
-        devtools/phpunit/vendor/bin/phpunit
 
     - name: Run CodeStyle Check
       run: make codestyle
