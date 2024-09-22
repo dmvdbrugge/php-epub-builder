@@ -26,6 +26,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Setup Make for CI
+      run: cp Makefile.ci Makefile.local
+
     - name: Validate Composer Files
       run: make validate
 
