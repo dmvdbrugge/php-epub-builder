@@ -16,7 +16,7 @@ codestyle: $(PHP_CS_FIXER)
 	$(PHP_CS_FIXER) $(CS_CMD) --verbose
 
 .PHONY: stan
-stan: $(PHPSTAN)
+stan: $(PHPSTAN) $(PHPUNIT)
 	$(PHPSTAN) analyze
 	$(PHPSTAN) analyze --configuration=phpstan-tests.neon.dist
 
@@ -31,5 +31,11 @@ validate:
 	$(COMPOSER) validate --no-check-publish --quiet --working-dir=devtools/phpstan
 	$(COMPOSER) validate --no-check-publish --quiet --working-dir=devtools/phpunit
 
-devtools/%/vendor/bin/%: devtools/%/composer.json
-	$(COMPOSER) install --working-dir=devtools/%
+$(PHP_CS_FIXER): devtools/php-cs-fixer/composer.json
+	$(COMPOSER) install --working-dir=devtools/php-cs-fixer
+
+$(PHPSTAN): devtools/phpstan/composer.json
+	$(COMPOSER) install --working-dir=devtools/phpstan
+
+$(PHPUNIT): devtools/phpunit/composer.json
+	$(COMPOSER) install --working-dir=devtools/phpunit
