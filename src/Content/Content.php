@@ -42,7 +42,7 @@ class Content
     }
 
     /**
-     * Variation on {@see self::item()} specifically for the toc.
+     * Variation on {@see self::item()} specifically for the css.
      */
     public static function cssItem(): string
     {
@@ -68,26 +68,30 @@ class Content
         string $modified,
     ): string {
         if (is_array($items)) {
-            $items = implode('', $items);
+            $items = implode("\n        ", $items);
         }
 
         if (is_array($itemrefs)) {
-            $itemrefs = implode('', $itemrefs);
+            $itemrefs = implode("\n        ", $itemrefs);
         }
 
         $identifiers = self::identifiers($isbn, $identifier);
 
         return <<<XML
             <?xml version="1.0" encoding="UTF-8"?>
-            <package xmlns="http://www.idpf.org/2007/opf" xmlns:opf="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="BookID">
+            <package xmlns="http://www.idpf.org/2007/opf" xmlns:opf="http://www.idpf.org/2007/opf" version="3.0"
+                prefix="created-with: https://github.com/dmvdbrugge/php-epub-builder" unique-identifier="BookID">
                 <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
                     {$identifiers}
                     <dc:title>{$title}</dc:title>
                     <dc:language>{$language}</dc:language>
                     <dc:publisher>{$publisher}</dc:publisher>
-                    <dc:creator>{$creator}</dc:creator>
+                    <dc:creator id="author">{$creator}</dc:creator>
+                    <meta refines="#author" property="role" scheme="marc:relators">aut</meta>
                     <dc:description>{$description}</dc:description>
                     <meta property="dcterms:modified">{$modified}</meta>
+                    <meta property="created-with:name">EPUB Builder</meta>
+                    <meta property="created-with:link">https://github.com/dmvdbrugge/php-epub-builder</meta>
                 </metadata>
                 <manifest>
                     {$items}
@@ -112,8 +116,10 @@ class Content
             XML;
 
         if ($identifier !== '') {
+            // Account for the relative spacing
             $result .= <<<XML
-                <dc:identifier>{$identifier}</dc:identifier>
+
+                        <dc:identifier>{$identifier}</dc:identifier>
                 XML;
         }
 

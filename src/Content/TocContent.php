@@ -26,7 +26,7 @@ class TocContent
     public static function file(string | array $nav): string
     {
         if (is_array($nav)) {
-            $nav = implode('', $nav);
+            $nav = implode("\n                ", $nav);
         }
 
         return <<<HTML
@@ -36,7 +36,11 @@ class TocContent
                     <link rel="stylesheet" type="text/css" href="page.css"/>
                 </head>
                 <body>
-                    <nav epub:type="toc"><ol>{$nav}</ol></nav>
+                    <nav epub:type="toc">
+                        <ol>
+                            {$nav}
+                        </ol>
+                    </nav>
                 </body>
             </html>
             HTML;

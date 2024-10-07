@@ -9,9 +9,10 @@
     * Validate content being xhtml
 * Tests
     * Just create more
-* Setup
-    * Github actions for devtools etc
 * Planned Features
     * Cover image
     * Custom additional content
     * ?
+* Changes
+    * `dcterms:modified` should be filled in automatically, as it is supposed to be the "last edited"
+    date of the epub file itself. The optional `dc:date` is for the "(original) publication date".
