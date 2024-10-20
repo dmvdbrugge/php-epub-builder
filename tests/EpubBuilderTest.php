@@ -92,6 +92,32 @@ class EpubBuilderTest extends TestCase
         File::close($handle);
     }
 
+    public function testIntegerChaptersDontBreak(): void
+    {
+        /*
+         * Key '2' will be cast to int by php (thanks), even though it's specified as string. This
+         * should be accepted, as there's nothing the user can do about it. Because *in this case*
+         * PHPStan does detect what happens, the ignore is needed.
+         */
+        $chapters = [
+            'Ch 1' => 'Chapter 1 content',
+            '2' => 'Chapter 2 content',
+        ];
+
+        $epub = (new EpubBuilder())
+            ->title("Integer Chapters")
+            ->chapters($chapters) // @phpstan-ignore argument.type (see above)
+            ->build();
+
+        $zip = new ZipArchive();
+        self::assertTrue($zip->open($epub->getFileOnDisk(), ZipArchive::RDONLY));
+
+        self::assertNotFalse($zip->locateName('content/Ch_1.xhtml'));
+        self::assertNotFalse($zip->locateName('content/2.xhtml'));
+
+        $zip->close();
+    }
+
     private static function testfile(): string
     {
         return sys_get_temp_dir() . '/Life Stories to Learn From; or Not.epub';

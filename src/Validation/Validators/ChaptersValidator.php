@@ -30,12 +30,8 @@ class ChaptersValidator extends BaseValidator
         $this->messages = [];
 
         foreach ($this->chapters as $name => $value) {
-            if (!is_string($name)) {
-                $this->messages[] = "Invalid chapter name, expected a string, got: " . gettype($name);
-            }
-
             if (!is_string($value)) {
-                $this->messages[] = "Invalid chapter content, expected a string, got: " . gettype($value);
+                $this->messages[] = "Invalid content for chapter '{$name}', expected a string, got: " . gettype($value);
             }
         }
 

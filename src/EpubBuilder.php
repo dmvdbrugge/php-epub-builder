@@ -303,6 +303,9 @@ class EpubBuilder
          * - the zip in the content folder.
          */
         foreach ($this->chapters as $name => $value) {
+            // string cast because php
+            $name = (string)$name;
+
             $sanitizedName = $this->sanitizeChapterName($name);
             $file = "{$sanitizedName}.xhtml";
 
